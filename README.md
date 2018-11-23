@@ -1,9 +1,9 @@
-## Celulární automat - Pohyb lidí v ohraničeném prostoru
+# Celulární automat - Pohyb lidí v ohraničeném prostoru
 
 - Zdrojový článek
 https://ac.els-cdn.com/S0378437101001418/1-s2.0-S0378437101001418-main.pdf?_tid=03729180-3c34-4543-a0e6-59e74e3b7e3a&acdnat=1542982739_cc793283e605f838052d87d4f3f66521
 
-# Základní princip a východiska
+## Základní princip a východiska
 - matice MxM, na ni náhodně na začátku simulace rozmístěno x lidí (dále fermionů - viz článek)
   - logicky platí, že x < MxM, nicméně začal bych s nějakým rozumným počtem x < (MxM)/1,5 třeba
 - rychlost pohybu fermionů za jednu časovou jednotku je konstantní -> 1
@@ -20,10 +20,10 @@ Na pohyb fermionů má vliv několik skutečností:
   - pozemní pole modifikuje pravděp. přechodu tak, že pohyb ve směru větších volných ploch je preferován
   - lze si představit jako druhou vrstvu buněk (o stejném MxM rozměru)
   - máme pozemní pole:
-      STATICKÉ (statická složka pozemního pole) - které je v čase zcela neměnné (tedy neovlivňováno fermiony). "Hodnota intenzity" statického pole je určena počtem tzv. s-bosonů: s-boson pro bod [x,y] je označen jako Ts(x,y). Počty s-bosonů pro všechny body [X,Y] jsou stanoveny fixně na začátku simulace.
+      - STATICKÉ (statická složka pozemního pole) - které je v čase zcela neměnné (tedy neovlivňováno fermiony). "Hodnota intenzity" statického pole je určena počtem tzv. s-bosonů: s-boson pro bod [x,y] je označen jako Ts(x,y). Počty s-bosonů pro všechny body [X,Y] jsou stanoveny fixně na začátku simulace.
         Př) Máme prostor MxM, modelujeme místnost s únikovým východem v případě požáru. Obecně lze říct, že být blíže u východu je fermiony preferovanější, tudíž počty s-bosonů jsou nejvyšší v bodech hned u něj a klesají s rostoucí vzdáleností od východu.
 
-      DYNAMICKÉ (dynamická složka pozemního pole) - které je naopak přítomností fermionů modifikováno a má svoji vlastní dynamiku. V tomto případě je "intenzita" dynamické složky modelována počty tzv. d-bosonů Td(x,y), kterých je na začátku simulace právě nula ve všech bodech. Jakmile fermion vykoná pohyb z [x,y] do jiné buňky, počet d-bosonů v buňce [x,y] vzroste o 1 ("stopa"...)
+      - DYNAMICKÉ (dynamická složka pozemního pole) - které je naopak přítomností fermionů modifikováno a má svoji vlastní dynamiku. V tomto případě je "intenzita" dynamické složky modelována počty tzv. d-bosonů Td(x,y), kterých je na začátku simulace právě nula ve všech bodech. Jakmile fermion vykoná pohyb z [x,y] do jiné buňky, počet d-bosonů v buňce [x,y] vzroste o 1 ("stopa"...)
         Př) Každý fermion zanechává po sobě "stopu", tzn. dynamická složka pozemního pole (tedy počet d-bosonů) je vyšší u obsazených buněk. Vzhledem k tomu, že celková pravděpodobnost zvolení směru pohybu závisí i na hodnotě dynamické složky pozemního pole, pro ostatní fermiony je žádoucí následovat ostatní fermiony.
         - dynamická složka pozemního pole se časem snižuje (stopy od ostatních fermionů postupem času mizí)
           - => jakmile jsou vykonány všechny přechody z t do t+1, nejstarší d-boson (Td) je z každé buňky odstraněn s pravděpodobností alfa (== vstupní parametr simulace), pokud existuje déle než jeden časový úsek (tj. pokud vznikl během předešlého nebo staršího přechodu)
@@ -38,7 +38,7 @@ p-ij = N x M-ij x D-ij x S-ij x ( 1 - n-ij ), kde:
     - D-ij - hodnota dynamické složky pozemního pole
     - S-ij - hodnota statické složky pozemního pole
 
-# Pravidla pohybu fermionů:
+## Pravidla pohybu fermionů:
 
 - Obecně platí, že cílová buňka pro čas t+1 je určena pro všechny fermiony v čase t paralelně ve stejný okamžik na základě jejich matice preferencí a hodnot statické a dynamické složky pozemního pole cílové buňky (viz vzorec o pár řádků výše)
 - v čase t každý fermion ověřuje, které sousední buňky jsou prázdné (hodnota n-ij == 0). Pravděpodobnost přechodu do obsazené buňky jsou nastaveny na nulu.
@@ -64,7 +64,7 @@ p-ij = N x exp(beta x J-s x delta-s(i,j)) x exp(beta x J-d x delta-d(i,j)) x (1 
     - ve všech ostatních případech platí, že d-i,j = 1
 
 
-Dodatek (vcelku irelevantní. Přečíst primárně řešení konfliktů v buňkách, třetí odrážka v pravidlech pohybu fermionů):
+- Dodatek (vcelku irelevantní. Přečíst primárně řešení konfliktů v buňkách, třetí odrážka v pravidlech pohybu fermionů):
     - Je-li pro nějaký fermion vypočtena cílová buňka taková,
         která je aktuálně (v čase t) obsazená, fermion se nehne (viz o jeden bod výše)
         která aktuálně není obsazená a necíluje-li ji pro čas t+1 jiný fermion, pohyb se vykoná.

@@ -46,7 +46,7 @@ int main(int argc, char **argv){
     }
 
     auto m = new Model(matrix_size, fermions, alpha, beta);
-    m->get_matrix_size();
+    m->run();
 
     return 0;
 }

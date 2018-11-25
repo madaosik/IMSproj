@@ -12,6 +12,7 @@
 #include <map>
 
 using std::map;
+using std::pair;
 
 class Model {
 public:
@@ -44,7 +45,16 @@ private:
     int exit_pos; //! position on exit on map
     int **matrix; //! [cols][rows]
     double **s_arr; //! [cols][rows]
-    map<int, map<int, int>> d_arr;
+
+    //! dynamic array -> contains count and age of d-bosons
+    //! index in map -> iteration: 1
+    map< int, map<int, int> > *d_arr;
+
+    //! fermion ID -> coordinates
+    map< int, pair<int, int> > *fermions_pos;
+
+
+
 
 
     /**
@@ -56,6 +66,7 @@ private:
 
     /**
      * Generates fermions to random position into matrix
+     * save their position to fermions_pos
      */
     void populate_matrix();
 
@@ -71,7 +82,9 @@ private:
      * @param col: index in matrix
      * @param value: value that should be added
      */
-    void insert(int, int, int);
+    void insert(int, int);
+
+    void perform_step();
 };
 
 #endif //IMS_MODEL_H

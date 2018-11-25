@@ -35,14 +35,22 @@ Model::Model(int matrix_size, int fermions, float alpha, float beta) {
         this->s_arr[i] = new double[matrix_size];
     }
 
+    d_arr = new map<int, map<int, int> >;
+    fermions_pos = new map<int, pair<int, int> >;
+
     populate_matrix();
-    print_matrix();
     generate_s_arr();
-    print_s_arr();
 }
 
 Model::~Model() {
-    // TODO free matrixes
+    for(int i = 0; i < matrix_size; i++){
+        delete matrix[i];
+        delete s_arr[i];
+    }
+    delete matrix;
+    delete s_arr;
+    delete d_arr;
+    delete fermions_pos;
 }
 
 int Model::random(int max) {
@@ -61,6 +69,7 @@ void Model::populate_matrix() {
             continue;
         }
         matrix[row][column] = 1;
+        fermions_pos->insert(make_pair(i, make_pair(row, column)));
     }
 }
 
@@ -120,42 +129,35 @@ void Model::generate_s_arr() {
     }
 }
 
-void Model::insert(int row, int col, int value) {
+void Model::insert(int row, int col) {
     int index = row * edge + col;
-    map<int, map<int, int>>::iterator it;
 
-    if((it = d_arr.find(index)) == d_arr.end()){
+    if((d_arr->find(index)) == d_arr->end()){
         map<int, int> tmp;
-        tmp.insert(make_pair(iteration, value));
-        d_arr.insert(make_pair(index, tmp));
+        tmp.insert(make_pair(iteration, 1));
+        d_arr->insert(make_pair(index, tmp));
     }
     else
-        it->second.insert(make_pair(iteration, value));
-
+        d_arr->operator[](index)[iteration] = 1;
 }
 
 void Model::run() {
-    map<int, map<int, int>>::iterator it;
-    map<int, int>::iterator it2;
-
-    insert(1,1,1);
-
-    insert(1,1,2);
-    insert(1,1,3);
-    insert(1,1,4);
-
-    it = d_arr.find(12);
-    for(it2 = it->second.begin(); it2 != it->second.end(); it++)
-        cout << it2->second << endl;
-
-
-    bool a = it == d_arr.end();
-
-
-    a = it->second.find(1) == it->second.end();
-    a = it->second.find(2) == it->second.end();
-    a = it->second.find(3) == it->second.end();
-    a = it->second.find(4) == it->second.end();
-    a = it->second.find(5) == it->second.end();
+    print_matrix();
+    for(int i = 0; i < 10; ++i){
+        perform_step();
+    }
 }
 
+void Model::perform_step() {
+    double preference_matrix[9] = {1.0/6, 1.0/9, 2.0/18,
+                                   1.0/6, 1.0/9, 2.0/18,
+                                   1.0/6, 1.0/9, 2.0/18};
+    map< int, pair<int, int> > data;
+
+    // calculate new position
+    for(int i = 0; i < fermions; ++i){
+        double rand = Random();
+        cout << rand << endl;
+        continue;
+    }
+}

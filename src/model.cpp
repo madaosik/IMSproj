@@ -149,15 +149,40 @@ void Model::run() {
 }
 
 void Model::perform_step() {
+    int row_start, col_start, // start row/col index to check move
+        row_end, col_end;   // end row/col index
+
     double preference_matrix[9] = {1.0/6, 1.0/9, 2.0/18,
                                    1.0/6, 1.0/9, 2.0/18,
                                    1.0/6, 1.0/9, 2.0/18};
-    map< int, pair<int, int> > data;
+    double move_matrix[9];
 
-    // calculate new position
+    // calculate new position and save it into data
+    map< int, pair<int, int> > data;
     for(int i = 0; i < fermions; ++i){
-        double rand = Random();
-        cout << rand << endl;
-        continue;
+        // current position of processed fermion
+        auto position = fermions_pos->find(i)->second;
+
+        // count available moves
+        get_limits(position.first, row_start, row_end);
+        get_limits(position.second, col_start, col_end);
+
+        // TODO: zkontrolovat s kolizama z matrix
+
+    }
+}
+
+void Model::get_limits(int position, int &start, int &end) {
+    if (position == 0){
+        start = 0;
+        end = 1;
+    }
+    else if(position == edge - 1){
+        start = position - 1;
+        end = position;
+    }
+    else{
+        start = position - 1;
+        end = position + 1;
     }
 }

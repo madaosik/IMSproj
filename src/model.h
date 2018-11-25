@@ -85,6 +85,8 @@ private:
     void insert(int, int);
 
     void perform_step();
+
+    void get_limits(int, int &, int &);
 };
 
 #endif //IMS_MODEL_H

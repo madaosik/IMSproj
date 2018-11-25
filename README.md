@@ -69,3 +69,27 @@ p-ij = N x exp(beta x J-s x delta-s(i,j)) x exp(beta x J-d x delta-d(i,j)) x (1 
         která je aktuálně (v čase t) obsazená, fermion se nehne (viz o jeden bod výše)
         která aktuálně není obsazená a necíluje-li ji pro čas t+1 jiný fermion, pohyb se vykoná.
         která aktuálně není obsazená a cíluje ji pro čas t+1 jeden nebo více fermionů, tento pohyb vykoná jen buňka s nejvyšší relativní pravděp. pohybu tímto směrem (viz vzorec a ilustrace v článku str 511 nahoře). Zbylé fermiony opět zůstávají na svých pozicích.
+
+## Simulace, tipy, inspirace a očekávané hodnoty
+- Simulace únikového východu z článku:
+  - dovolili fermionům pohybovat se jen 5 směry (tedy ne diagonálně), to bychom si možná taky mohli zjednodušit
+  - matice (místnost) nemusí být nutně čtvercová, nicméně oni též zvolili čtvercovou (stejně jako my), takže cajk
+  - studovali vliv délky života d-bosonů, konkrétně parametru alfa (s jakou pravděp. se v rámci dané iterace odstraní nejstarší d-boson z buňky....) na celkovou evakuační dobu - tedy za jak dlouho všichni opustí místnost, přičemž "východ" je definován jako tři souvislé body (tedy místnost mohou opustit tři lidi zároveň v rámci jedné iterace, což tak nějak odpovídá i realitě...)
+    - -> jinými slovy "konec života fermionu" bych namodeloval tak, že dostane-li se jakýkoli fermion na jeden z těchto tří bodů, v rámci další iterace už se vůbec neřeší jeho preference a všechno ostatní a prostě přestane existovat, opouští systém (a samozřejmě uvolní místo u dveří...)
+  - výchozí parametry simulace: J-s = 2; J-d = 10; beta = 10 (takto bych v rámci testování model spouštěl...)
+  - ZÁVĚRY (aneb k čemu bychom měli s danými parametry asi ideálně rámcově taky nějak dospět):
+      - při vyšší J-s, např. J-s = 2, tedy silnější vazbé fermionů na s-bosony, roste doba potřebná k evakuaci s nárůstem životnosti d-bosonů (== jinými slovy při nízkém alfa, tedy pravděpodobnosti jejich zániku...)
+      -  pokud je J-s menší, např. J-s = 0,5, nejlepší evakuační časy jsou při "střední až malé životnosti" d-bosonů, tedy pro alfa okolo 0,55-0,70
+      - co z toho všeho lze vyvodit 
+        - při intenzivnější vzájemné vazbě mezi fermiony (...menší alfa -> delší životnost průměrného d-bosonu) může vést k zásadním změnám chování fermionů. 
+        - Tyto změny jsou ještě zásadnější, když fermiony nemají příliš velké ponětí o tom, jaká je nejlepší cesta k nejbližšímu východu (....menší J-s -> menší vazba fermionů na hodnoty statického pole -> menší ovlivňování jejich následujícího kroku od statického pole...). 
+        - Pokud se J-s blíží k nule (tedy pokud fermiony nemají téměř potuchy, kde východ je), tak snížení hodnoty alfa (zvýšení délky života průměrného d-bosonu) z již nízkých hodnot (např z 0,2 na 0,1) vede k drastickému nárůstu evakuační doby (v jejich případě konkrétně z 800 na 2000 časových jednotek) - viz grafy str. 518
+
+- -> simulujeme únikový východ, který odpovídá třem vedle sobě ležícím bodům
+- -> pro začátek nastavíme parametry následovně:
+  - J-s = 2
+  - J-d = 10
+  - beta = 10
+  - alfa = 0,5 
+- -> a budeme si následně hrát se vším ohledně bety, přičemž to, co nás zajímá, je doba potřebná k evakuaci. 
+

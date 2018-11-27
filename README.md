@@ -60,9 +60,14 @@ p-ij = N x M-ij x D-ij x S-ij x ( 1 - n-ij ), kde:
 
 Pravděpodobnost přechodu z aktuálního bodu (0,0) (středová buňka) do neobsazeného souseda je tedy:
 
-p-ij = N x exp(beta x J-s x delta-s(i,j)) x exp(beta x J-d x delta-d(i,j)) x (1 - n-ij) x d-ij (viz str 514 nahoře) kde:
+Obecně:
+p-ij = N x M-ij x D-ij x S-ij x (1 - n-i,j) x d-ij
+
+Detailně:
+p-ij = N x M-ij x exp(beta x J-s x delta-s(i,j)) x exp(beta x J-d x delta-d(i,j)) x (1 - n-ij) x d-ij (viz str 514 nahoře) kde:
 
   - N == normalizační faktor, viz vzorec výše
+  - M-ij: pravděpodobnost pohybu ve směru (i,j) podle statické 3x3 matice preferencí
   - J-s je "míra vlivu" s-bosonů (statické složky pozemního pole) na pohyb fermionů (=> další vstupní argument simulace)
   - J-d: totéž pro d-bosony (dynamickou složku)
   - delta-s(i,j) je rozdíl v počtu s-bosonů v cílovém bodě a výchozím bodě přechodu (Ts(i,j) - Ts(0,0))

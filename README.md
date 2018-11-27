@@ -13,8 +13,9 @@ Na pohyb fermionů má vliv několik skutečností:
 - STATICKÁ (tedy po celou dobu programu neměnná) 3x3 MATICE PREFERENCÍ směru pohybu fermionů do sousedních buněk
   - ze současného bodu se můžu pohybovat osmi různými směry (plus devátý směr je setrvání na místě) - ilustrace článek str 511 nahoře
   - hodnoty polí matice (M(i,j)) lze stanovit různými způsoby (inspirace např Appendix A článku), to chce ještě poladit (@Adam), ale pro začátek si tam můžeme hodit vcelku cokoli. Musí samozřejmě platit, že suma pravděpodobnosti těchto 9 možných pohybů je 1.
+  - pokud chceme docílit maximálního proudění lidí (nejrychlejšího dosažení východu), tak by byla matice preferencí nulová ve všech bodech kromě jednoho (uvádí v článku, že i takto je to validní). Tím se zamezí vzájemnému vlivu dráh (každý si drží svoji lajnu....) a tedy zpomalení
   - Př) Pokud může fermion jít jen jedním směrem (např modelujeme frontu někam...), bude M(0,1) = 1 a všechny zbylé M(i,j)=0
-  - ZÁVĚR: Fermion se z pozice v čase t může vydat do pozice v čase t + 1 9 různými směry. Kam se nakonec vydá, je dáno maticí preference.
+  - ZÁVĚR: Fermion se z pozice v čase t může vydat do pozice v čase t + 1 9 různými směry. Kam se nakonec vydá, je dáno pravděpodobnostmi obsaženými v matici preference a hodnotami pozemního a dynamického pole (viz dále).
 
 - POZEMNÍ POLE, jehož účelem je modelovat vlivy interakcí mezi fermiony na delší vzdálenosti. Jeho hodnota v buňkách je modifikována fermiony a fermiony jsou hodnotami pozemního pole v daných buňkách ovlivňovány (konkrétně pravděpodobnosti přechodu do různých směrů)
   - pozemní pole modifikuje pravděp. přechodu tak, že pohyb ve směru větších volných ploch je preferován
@@ -46,6 +47,16 @@ p-ij = N x M-ij x D-ij x S-ij x ( 1 - n-ij ), kde:
 - Hodnota dynamické složky pozemního pole se mění na základě pravidel postupného "mizení stop" - viz popis dynamické složky pozemního pole výše
 - Fermiony mění hodnotu dynamické složky pozemního pole v buňce, ve které se nacházeli v čase t+1 před přechodem
 
+# Pravidla algoritmicky (v tomto pořadí)
+
+- 1) Hodnota dynamického pole (počet d-bosonů) je aktualizována. Tedy z každé buňky je odstraněn nejstarší boson (který se tam nachází > 1 periodu) s pravděpodobností alfa
+- 2) Pro každý fermion je určena pravděpodobnost přechodu do všech volných okolních buněk (i,j) na základě matice preferencí a hodnot statického a dynamického pole
+- 3) Každý fermion si vybere cíl svého pohybu na základě pravděpodobností přechodu do dané buňky p-i,j vypočtených v bodě 2.
+- 4) Jsou vyřešeny konflikty. Tedy pokud m fermionů cíluje stejnou buňku, je z nich vybrán jeden s pravděpodobností 1/m. Ostatní se nehýbou.
+- 5) Fermiony, kterým je dovoleno se pohnout, tak učiní.
+- 6) Fermiony mění hodnotu dynamického pole v buňce, kterou obsazovali před pohybem jinam.
+
+# Implementace přechodů
 
 Pravděpodobnost přechodu z aktuálního bodu (0,0) (středová buňka) do neobsazeného souseda je tedy:
 

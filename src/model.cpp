@@ -18,12 +18,14 @@ using std::endl;
 using std::pair;
 using std::make_pair;
 
-Model::Model(int matrix_size, int fermions, float alpha, float beta) {
+Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_s, double j_d) {
     this->fermions = fermions;
     this->alpha = alpha;
     this->beta = beta;
     this->edge = matrix_size;
     this->matrix_size = matrix_size * matrix_size;
+    this->j_d = j_d;
+    this->j_s = j_s;
 
     // set exit to center of edge
     this->exit_pos = edge / 2;
@@ -155,19 +157,45 @@ void Model::perform_step() {
     double preference_matrix[9] = {1.0/6, 1.0/9, 2.0/18,
                                    1.0/6, 1.0/9, 2.0/18,
                                    1.0/6, 1.0/9, 2.0/18};
-    double move_matrix[9];
+    double tmp_matrix[3][3];
 
     // calculate new position and save it into data
     map< int, pair<int, int> > data;
     for(int i = 0; i < fermions; ++i){
+        tmp_matrix[3][3] = {0};
+
         // current position of processed fermion
         auto position = fermions_pos->find(i)->second;
+        // s bosons in current position
+        double ts_x_y = s_arr[position.first][position.second];
+        // d bosons in current position
+        auto tmp = d_arr->find(position.first * edge + position.second);
+        double td_x_y = tmp->second.size(); // FIXME: check if size works
+        // delta s(i,j)
+        double delta_s_ij;
+        // delta d(i,j)
+        double delta_d_ij;
+        // tmp for counting result
+        double tmp1, tmp2;
+        // normalization factor N
+        double n = 1;
 
         // count available moves
         get_limits(position.first, row_start, row_end);
         get_limits(position.second, col_start, col_end);
 
-        // TODO: zkontrolovat s kolizama z matrix
+        for(int x = row_start; x <= row_end; ++x){
+            for(int y = col_start; y <= col_end; ++y){
+                // check if fermion can access this position -- substitute n-i,j
+                if(matrix[position.first + x + 1][position.second + y + 1] == 0){
+                    delta_s_ij = (s_arr[position.first + x + 1][position.second + y + 1]) - ts_x_y;
+                    delta_d_ij = (d_arr[position.first + x + 1][position.second + y + 1]) - td_x_y;
+                    tmp1 = Exponential(beta * j_s * delta_s_ij);
+                    tmp2 = Exponential(beta * j_d * delta_d_ij);
+                    tmp_matrix[x-1][y+1] = n * tmp1 * tmp2; // FIXME: * d-i,j; <<<<<<<<?????
+                }
+            }
+        }
 
     }
 }
@@ -178,11 +206,11 @@ void Model::get_limits(int position, int &start, int &end) {
         end = 1;
     }
     else if(position == edge - 1){
-        start = position - 1;
-        end = position;
+        start = -1;
+        end = 0;
     }
     else{
-        start = position - 1;
-        end = position + 1;
+        start = -1;
+        end = 1;
     }
 }

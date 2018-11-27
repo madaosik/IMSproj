@@ -16,7 +16,7 @@ using std::pair;
 
 class Model {
 public:
-    Model(int, int, float, float);
+    Model(int, int, double, double, double, double);
     ~Model();
 
     /**
@@ -34,11 +34,14 @@ public:
 
 private:
     /** Input arguments */
-    float alpha;
-    float beta;
+    double alpha;
+    double beta;
+    double j_s;
+    double j_d;
     int fermions;
     int edge;
     int matrix_size;
+
 
     /** Program defined variables **/
     int iteration; //! iteration count

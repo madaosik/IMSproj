@@ -18,21 +18,28 @@ using std::cerr;
 using std::endl;
 
 int main(int argc, char **argv){
-    int c, matrix_size = 0, alpha = 1, beta = 1, fermions = 0;
+    int c, matrix_size = 0,  fermions = 0;
+    double alpha = 0.5, beta = 10, j_s = 2, j_d = 10;
 
-    while ((c = getopt(argc, argv, "a:b:m:f:")) != -1)
+    while ((c = getopt(argc, argv, "a:b:m:f:s:d:")) != -1)
         switch (c) {
             case 'a':
-                alpha = atoi(optarg);
+                alpha = atof(optarg);
                 break;
             case 'b':
-                beta = atoi(optarg);
+                beta = atof(optarg);
                 break;
             case 'm':
                 matrix_size = atoi(optarg);
                 break;
             case 'f':
                 fermions = atoi(optarg);
+                break;
+            case 's':
+                j_s = atof(optarg);
+                break;
+            case 'd':
+                j_d = atof(optarg);
                 break;
             case '?':
             default:
@@ -45,7 +52,7 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    auto m = new Model(matrix_size, fermions, alpha, beta);
+    auto m = new Model(matrix_size, fermions, alpha, beta, j_s, j_d);
     m->run();
 
     return 0;

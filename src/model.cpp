@@ -197,7 +197,7 @@ void Model::perform_step() {
         for(int x = row_start; x <= row_end; ++x){
             for(int y = col_start; y <= col_end; ++y){
                 // check if fermion can access this position -- substitute n-i,j
-                if(matrix[position.first + x + 1][position.second + y + 1] == 0){
+                if(matrix[position.first + x][position.second + y] == 0){
                     delta_s_ij = (s_arr[position.first + x][position.second + y]) - ts_xy;
                     index = (position.first + x) * edge + position.second + y;
                     if ((d_arr->find(index)) != d_arr->end()) // FIXME: this is always ZEROOOOOO
@@ -220,7 +220,7 @@ void Model::perform_step() {
         // TODO: calculate normalization and normalize 'random' or each value in matrix
 
         // select random position for move
-        double random = Random() ;
+        double random = Random();
         double tmp_num = 0;
         for(int x = row_start; x <= row_end; ++x) {
             for (int y = col_start; y <= col_end; ++y) {

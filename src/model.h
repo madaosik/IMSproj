@@ -10,9 +10,11 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 
 using std::map;
 using std::pair;
+using std::vector;
 
 class Model {
 public:
@@ -40,7 +42,7 @@ private:
     double j_d;
     int fermions;
     int edge;
-    int matrix_size;
+    int matrix_size; //! edge * edge
 
 
     /** Program defined variables **/
@@ -49,13 +51,15 @@ private:
     int **matrix; //! [cols][rows]
     double **s_arr; //! [cols][rows]
 
-    //! dynamic array -> contains count and age of d-bosons
-    //! index in map -> iteration: 1
-    map< int, map<int, int> > *d_arr;
+    //! dynamic array
+    //! index in map: iterations
+    map< int, vector<int>* > *d_arr;
 
     //! fermion ID -> coordinates
     map< int, pair<int, int> > *fermions_pos;
-
+    //! fermion ID -> coordinates
+    //! contains fermions position one iteration backward
+    map< int, pair<int, int> > *fermions_pos2;
 
 
 
@@ -83,7 +87,6 @@ private:
      * Insert value to d_arr -> < matrix_index < iteration, value > >
      * @param row: index in matrix
      * @param col: index in matrix
-     * @param value: value that should be added
      */
     void insert(int, int);
 

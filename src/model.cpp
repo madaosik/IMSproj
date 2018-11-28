@@ -36,9 +36,9 @@ Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_
         this->matrix[i] = new int[matrix_size];
         this->s_arr[i] = new double[matrix_size];
     }
-
-    d_arr = new map<int, map<int, int> >;
+    d_arr = new map<int, vector<int>* >;
     fermions_pos = new map<int, pair<int, int> >;
+    fermions_pos2 = new map<int, pair<int, int> >;
 
     populate_matrix();
     generate_s_arr();
@@ -53,6 +53,7 @@ Model::~Model() {
     delete s_arr;
     delete d_arr;
     delete fermions_pos;
+    delete fermions_pos2;
 }
 
 int Model::random(int max) {
@@ -134,13 +135,14 @@ void Model::generate_s_arr() {
 void Model::insert(int row, int col) {
     int index = row * edge + col;
 
-    if((d_arr->find(index)) == d_arr->end()){
-        map<int, int> tmp;
-        tmp.insert(make_pair(iteration, 1));
+    if((d_arr->find(index)) == d_arr->end()) {
+        auto tmp = new vector<int>;
+        tmp->push_back(iteration);
         d_arr->insert(make_pair(index, tmp));
     }
-    else
-        d_arr->operator[](index)[iteration] = 1;
+    else{
+        d_arr->operator[](index)->push_back(iteration);
+    }
 }
 
 void Model::run() {
@@ -151,26 +153,32 @@ void Model::run() {
 }
 
 void Model::perform_step() {
-    int row_start, col_start, // start row/col index to check move
-        row_end, col_end;   // end row/col index
+    int row_start, col_start, row_end, col_end;// start row/col index to check move
+             // end row/col index
 
-    double preference_matrix[9] = {1.0/6, 1.0/9, 2.0/18,
-                                   1.0/6, 1.0/9, 2.0/18,
-                                   1.0/6, 1.0/9, 2.0/18};
+    double preference_matrix[3][3] = {{1.0/6, 1.0/9, 2.0/18},
+                                      {1.0/6, 1.0/9, 2.0/18},
+                                      {1.0/6, 1.0/9, 2.0/18}};
     double tmp_matrix[3][3];
 
+    int move_matrix[edge][edge];
+    std::fill(move_matrix[0], move_matrix[0] + matrix_size, 0);
     // calculate new position and save it into data
     map< int, pair<int, int> > data;
     for(int i = 0; i < fermions; ++i){
         tmp_matrix[3][3] = {0};
+        std::fill(tmp_matrix[0], tmp_matrix[0] + 9, 0);
 
         // current position of processed fermion
         auto position = fermions_pos->find(i)->second;
         // s bosons in current position
-        double ts_x_y = s_arr[position.first][position.second];
+        double ts_xy = s_arr[position.first][position.second];
+        // support for indexing
+        int index = position.first * edge + position.second;
         // d bosons in current position
-        auto tmp = d_arr->find(position.first * edge + position.second);
-        double td_x_y = tmp->second.size(); // FIXME: check if size works
+        double td_xy = 0;
+        if ((d_arr->find(index)) != d_arr->end())
+            td_xy = d_arr->operator[](index)->size();
         // delta s(i,j)
         double delta_s_ij;
         // delta d(i,j)
@@ -180,6 +188,8 @@ void Model::perform_step() {
         // normalization factor N
         double n = 1;
 
+        int d_ij;
+
         // count available moves
         get_limits(position.first, row_start, row_end);
         get_limits(position.second, col_start, col_end);
@@ -188,16 +198,29 @@ void Model::perform_step() {
             for(int y = col_start; y <= col_end; ++y){
                 // check if fermion can access this position -- substitute n-i,j
                 if(matrix[position.first + x + 1][position.second + y + 1] == 0){
-                    delta_s_ij = (s_arr[position.first + x + 1][position.second + y + 1]) - ts_x_y;
-                    delta_d_ij = (d_arr[position.first + x + 1][position.second + y + 1]) - td_x_y;
+                    delta_s_ij = (s_arr[position.first + x][position.second + y]) - ts_xy;
+                    index = (position.first + x) * edge + position.second + y;
+                    if ((d_arr->find(index)) != d_arr->end()) // FIXME: this is always ZEROOOOOO
+                        delta_d_ij = d_arr->operator[](index)->size() - td_xy;
+                    else
+                        delta_d_ij = 0;
                     tmp1 = Exponential(beta * j_s * delta_s_ij);
                     tmp2 = Exponential(beta * j_d * delta_d_ij);
-                    tmp_matrix[x-1][y+1] = n * tmp1 * tmp2; // FIXME: * d-i,j; <<<<<<<<?????
+                    d_ij = 1; // FIXME: not always 1
+                    double val = n * preference_matrix[x + 1][y + 1] * tmp1 * tmp2 * d_ij;
+                    tmp_matrix[x+1][y+1] = val;
                 }
             }
         }
 
+
+        // TODO: select random move and save it into data and increment move_matrix
     }
+
+    // TODO: perform moves --> iterate over data and resolve conflicts from move_matrix
+
+
+
 }
 
 void Model::get_limits(int position, int &start, int &end) {

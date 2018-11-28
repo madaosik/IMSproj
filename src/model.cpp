@@ -185,10 +185,10 @@ void Model::perform_step() {
         double delta_d_ij;
         // tmp for counting result
         double tmp1, tmp2;
-        // normalization factor N
-        double n = 1;
 
         int d_ij;
+        double normalization_counter = 0;
+        int not_null_coordinates = 0;
 
         // count available moves
         get_limits(position.first, row_start, row_end);
@@ -204,23 +204,35 @@ void Model::perform_step() {
                         delta_d_ij = d_arr->operator[](index)->size() - td_xy;
                     else
                         delta_d_ij = 0;
+                    if (delta_d_ij < 0) // TODO: check
+                        delta_d_ij = 0;
                     tmp1 = Exponential(beta * j_s * delta_s_ij);
                     tmp2 = Exponential(beta * j_d * delta_d_ij);
-                    d_ij = 1; // FIXME: not always 1
-                    double val = n * preference_matrix[x + 1][y + 1] * tmp1 * tmp2 * d_ij;
+                    d_ij = 1; // FIXME: this should be counted
+                    double val = preference_matrix[x + 1][y + 1] * tmp1 * tmp2 * d_ij;
                     tmp_matrix[x+1][y+1] = val;
+                    normalization_counter += val;
+                    if(val)
+                        ++not_null_coordinates;
                 }
             }
         }
+        // TODO: calculate normalization and normalize 'random' or each value in matrix
 
-
-        // TODO: select random move and save it into data and increment move_matrix
+        // select random position for move
+        double random = Random() ;
+        double tmp_num = 0;
+        for(int x = row_start; x <= row_end; ++x) {
+            for (int y = col_start; y <= col_end; ++y) {
+                // TODO: choose random move and save its coordindates [x,y] increment position in move_matrix
+            }
+        }
     }
 
     // TODO: perform moves --> iterate over data and resolve conflicts from move_matrix
 
 
-
+    ++iteration;
 }
 
 void Model::get_limits(int position, int &start, int &end) {

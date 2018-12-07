@@ -50,6 +50,7 @@ private:
     int exit_pos; //! position on exit on map
     int **matrix; //! [cols][rows]
     double **s_arr; //! [cols][rows]
+    int finished_fermions;
 
     //! dynamic array
     //! index in map: iterations
@@ -57,12 +58,6 @@ private:
 
     //! fermion ID -> coordinates
     map< int, pair<int, int> > *fermions_pos;
-    //! fermion ID -> coordinates
-    //! contains fermions position one iteration backward
-    map< int, pair<int, int> > *fermions_pos2;
-
-
-
 
     /**
      * Generates random number from zero to range
@@ -84,7 +79,8 @@ private:
     void generate_s_arr();
 
     /**
-     * Insert value to d_arr -> < matrix_index < iteration, value > >
+     * Insert d-bosson (value to d_arr)
+     * < matrix_index < iteration > >
      * @param row: index in matrix
      * @param col: index in matrix
      */
@@ -93,6 +89,8 @@ private:
     void perform_step();
 
     void get_limits(int, int &, int &);
+
+    void remove_old_d_bossons();
 };
 
 #endif //IMS_MODEL_H

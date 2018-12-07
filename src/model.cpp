@@ -6,7 +6,7 @@
  *********************************/
 #include "model.h"
 
-
+#include <bits/stdc++.h>
 #include <iostream>
 #include <cstdlib>
 #include <simlib.h>
@@ -26,6 +26,7 @@ Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_
     this->matrix_size = matrix_size * matrix_size;
     this->j_d = j_d;
     this->j_s = j_s;
+    this->finished_fermions = 0;
 
     // set exit to center of edge
     this->exit_pos = edge / 2;
@@ -38,10 +39,12 @@ Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_
     }
     d_arr = new map<int, vector<int>* >;
     fermions_pos = new map<int, pair<int, int> >;
-    fermions_pos2 = new map<int, pair<int, int> >;
 
     populate_matrix();
     generate_s_arr();
+
+    srand(time(NULL));
+    RandomSeed(rand());
 }
 
 Model::~Model() {
@@ -53,12 +56,10 @@ Model::~Model() {
     delete s_arr;
     delete d_arr;
     delete fermions_pos;
-    delete fermions_pos2;
 }
 
 int Model::random(int max) {
-    srand(time(NULL));
-    return rand() % max;
+    return (int)(Random() * max);
 }
 
 void Model::populate_matrix() {
@@ -86,6 +87,8 @@ void Model::print_matrix() {
         else
             cout << "|";
         for(int j = 0; j < edge; j++){
+            if(matrix[i][j] > 1)
+                cout << "Error" << endl;
             if(matrix[i][j])
                 cout << " x";
             else
@@ -147,14 +150,18 @@ void Model::insert(int row, int col) {
 
 void Model::run() {
     print_matrix();
-    for(int i = 0; i < 10; ++i){
+    while(finished_fermions != fermions){
         perform_step();
+        remove_old_d_bossons();
+        print_matrix();
     }
+    cout << "Total count of iterations is: " << iteration << endl;
 }
 
 void Model::perform_step() {
-    int row_start, col_start, row_end, col_end;// start row/col index to check move
-             // end row/col index
+    ++iteration;
+
+    int row_start, col_start, row_end, col_end;// start row/col index to check move, end row/col index
 
     double preference_matrix[3][3] = {{1.0/6, 1.0/9, 2.0/18},
                                       {1.0/6, 1.0/9, 2.0/18},
@@ -163,14 +170,30 @@ void Model::perform_step() {
 
     int move_matrix[edge][edge];
     std::fill(move_matrix[0], move_matrix[0] + matrix_size, 0);
+
     // calculate new position and save it into data
     map< int, pair<int, int> > data;
+
     for(int i = 0; i < fermions; ++i){
+        auto f = fermions_pos->find(i);
+        if(f == fermions_pos->end())
+            continue;
+
+        // current position of processed fermion
+        auto position = f->second;
+
+        // if fermion is on end position, remove it
+        if(position.second == 0){
+            if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1){
+                ++finished_fermions;
+                fermions_pos->erase(i);
+                continue;
+            }
+        }
+
         tmp_matrix[3][3] = {0};
         std::fill(tmp_matrix[0], tmp_matrix[0] + 9, 0);
 
-        // current position of processed fermion
-        auto position = fermions_pos->find(i)->second;
         // s bosons in current position
         double ts_xy = s_arr[position.first][position.second];
         // support for indexing
@@ -187,52 +210,109 @@ void Model::perform_step() {
         double tmp1, tmp2;
 
         int d_ij;
-        double normalization_counter = 0;
-        int not_null_coordinates = 0;
+        double normalization = 0;
 
         // count available moves
         get_limits(position.first, row_start, row_end);
         get_limits(position.second, col_start, col_end);
 
+        // fill tmp_matrix
         for(int x = row_start; x <= row_end; ++x){
             for(int y = col_start; y <= col_end; ++y){
                 // check if fermion can access this position -- substitute n-i,j
-                if(matrix[position.first + x][position.second + y] == 0){
+                if(matrix[position.first + x][position.second + y] == 0 || (x == 0 && y == 0)){
                     delta_s_ij = (s_arr[position.first + x][position.second + y]) - ts_xy;
                     index = (position.first + x) * edge + position.second + y;
-                    if ((d_arr->find(index)) != d_arr->end()) // FIXME: this is always ZEROOOOOO
+                    if ((d_arr->find(index)) != d_arr->end())
                         delta_d_ij = d_arr->operator[](index)->size() - td_xy;
                     else
                         delta_d_ij = 0;
-                    if (delta_d_ij < 0) // TODO: check
-                        delta_d_ij = 0;
-                    tmp1 = Exponential(beta * j_s * delta_s_ij);
-                    tmp2 = Exponential(beta * j_d * delta_d_ij);
+                    tmp1 = exp(beta * j_s * delta_s_ij);
+                    tmp2 = exp(beta * j_d * delta_d_ij);
                     d_ij = 1; // FIXME: this should be counted
                     double val = preference_matrix[x + 1][y + 1] * tmp1 * tmp2 * d_ij;
                     tmp_matrix[x+1][y+1] = val;
-                    normalization_counter += val;
-                    if(val)
-                        ++not_null_coordinates;
+                    normalization += val;
                 }
             }
         }
-        // TODO: calculate normalization and normalize 'random' or each value in matrix
 
         // select random position for move
-        double random = Random();
-        double tmp_num = 0;
-        for(int x = row_start; x <= row_end; ++x) {
-            for (int y = col_start; y <= col_end; ++y) {
-                // TODO: choose random move and save its coordindates [x,y] increment position in move_matrix
+        double random = Random() * normalization;
+        bool stop_iteration = false;
+        for(int x = 2; x >= 0; --x) {
+            for (int y = 2; y >= 0; --y) {
+                normalization -= tmp_matrix[x][y];
+                // check if current index is the one && index is not zero (fermion can not access this position)
+                if(normalization < random && (tmp_matrix[x][y] != 0 || (x == 0 && y == 0))){
+                    stop_iteration = true;
+                    ++move_matrix[position.first + x - 1][position.second + y - 1];
+                    data.insert(make_pair(i, make_pair(position.first + x - 1, position.second + y - 1)));
+                    break;
+                }
+            }
+            if(stop_iteration)
+                break;
+        }
+        if(!stop_iteration)
+            cout << "Error 1" << endl;
+    }
+
+    // do move
+    for(int i = 0; i < fermions; ++i){
+        auto pos = data.find(i);
+        if(pos == data.end())
+            continue;
+        auto position = pos->second;
+
+        // if fermione is alone, make move
+        if(move_matrix[position.first][position.second] == 1){
+            auto ferm = fermions_pos->find(i);
+            if(ferm == fermions_pos->end()){
+                cout << "Error 2" << endl;
+                continue;
+            }
+            ferm->second = make_pair(position.first, position.second);
+            insert(position.first, position.second);
+        }
+        else{
+            double random = Random() * move_matrix[position.first][position.second];
+            auto ferm = fermions_pos->find(i);
+
+            // fermion won battle for position
+            if(random < 1.0){
+                ferm->second = make_pair(position.first, position.second);
+                insert(position.first, position.second);
+
+                for(int j = i + 1; j < fermions; ++j){
+                    auto ferm_dupl = data.find(j);
+                    if(ferm_dupl == data.end())
+                        continue;
+
+                    if(ferm_dupl->second.first == position.first && ferm_dupl->second.second == position.second){
+                        ferm_dupl = fermions_pos->find(j);
+                        if(ferm_dupl == data.end()){
+                            cout << "Error 3" << endl;
+                            continue;
+                        }
+                        ++move_matrix[ferm_dupl->second.first][ferm_dupl->second.second];
+                        --move_matrix[position.first][position.second];
+                        data.erase(j);
+                    }
+                }
+            }
+            else{
+                ++move_matrix[ferm->second.first][ferm->second.second];
+                --move_matrix[position.first][position.second];
+                insert(position.first, position.second);
             }
         }
     }
+    cout << endl;
 
-    // TODO: perform moves --> iterate over data and resolve conflicts from move_matrix
-
-
-    ++iteration;
+    for(int i = 0; i < edge; ++i)
+        for(int j = 0; j < edge; ++j)
+            matrix[i][j] = move_matrix[i][j];
 }
 
 void Model::get_limits(int position, int &start, int &end) {
@@ -247,5 +327,18 @@ void Model::get_limits(int position, int &start, int &end) {
     else{
         start = -1;
         end = 1;
+    }
+}
+
+void Model::remove_old_d_bossons() {
+    int iteration = this->iteration - 2;
+    if (iteration > 0){
+        for (int i = 0; i < matrix_size; ++i) {
+            auto boson_item = d_arr->find(i);
+            if (boson_item == d_arr->end())
+                continue;
+            if (Random() < alpha && !boson_item->second->empty())
+                boson_item->second->erase(boson_item->second->begin());
+        }
     }
 }

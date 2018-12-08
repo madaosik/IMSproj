@@ -82,7 +82,7 @@ void Model::print_matrix() {
         cout << "--";
     cout << "-" << endl;
     for(int i = 0; i < edge; ++i){
-        if(i == exit_pos)
+        if(i == exit_pos || i == exit_pos + 1 || i == exit_pos - 1)
             cout << " ";
         else
             cout << "|";
@@ -190,7 +190,8 @@ void Model::perform_step() {
 
         // if fermion is on end position, remove it
         if(position.second == 0){
-            if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1){
+            if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1 ||
+               position.first == exit_pos + 2 || position.first == exit_pos - 2){
                 ++finished_fermions;
                 fermions_pos->erase(i);
                 continue;

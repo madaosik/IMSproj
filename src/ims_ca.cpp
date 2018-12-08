@@ -16,12 +16,13 @@
 
 using std::cerr;
 using std::endl;
+using std::cout;
 
 int main(int argc, char **argv){
     int c, matrix_size = 0,  fermions = 0;
-    double alpha = 0.5, beta = 10, j_s = 2, j_d = 1;
+    double alpha = 0.5, beta = 10, j_s = 2, j_d = 1, j_o = 1;
 
-    while ((c = getopt(argc, argv, "a:b:m:f:s:d:")) != -1)
+    while ((c = getopt(argc, argv, "a:b:m:f:s:d:o:")) != -1)
         switch (c) {
             case 'a': // alpha
                 alpha = atof(optarg);
@@ -41,6 +42,9 @@ int main(int argc, char **argv){
             case 'd': // J-d
                 j_d = atof(optarg);
                 break;
+            case 'o': // J-o
+                j_o = atof(optarg);
+                break;
             case '?':
             default:
 
@@ -52,8 +56,9 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    auto m = new Model(matrix_size, fermions, alpha, beta, j_s, j_d);
-    m->run();
+    auto m = new Model(matrix_size, fermions, alpha, beta, j_s, j_d, j_o);
+    int res = m->run();
+    cout << "This configurations takes exactly " <<  res << " iterations to finish" << endl;
 
     return 0;
 }

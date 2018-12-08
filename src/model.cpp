@@ -18,7 +18,7 @@ using std::endl;
 using std::pair;
 using std::make_pair;
 
-Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_s, double j_d) {
+Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_s, double j_d, double j_o) {
     this->fermions = fermions;
     this->alpha = alpha;
     this->beta = beta;
@@ -26,6 +26,7 @@ Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_
     this->matrix_size = matrix_size * matrix_size;
     this->j_d = j_d;
     this->j_s = j_s;
+    this->j_o = j_o;
     this->finished_fermions = 0;
 
     // set exit to center of edge
@@ -39,12 +40,13 @@ Model::Model(int matrix_size, int fermions, double alpha, double beta, double j_
     }
     d_arr = new map<int, vector<int>* >;
     fermions_pos = new map<int, pair<int, int> >;
-
-    populate_matrix();
-    generate_s_arr();
+    old_fermions_pos = new map<int, pair<int, int> >;
 
     srand(time(NULL));
     RandomSeed(rand());
+
+    populate_matrix();
+    generate_s_arr();
 }
 
 Model::~Model() {
@@ -56,6 +58,7 @@ Model::~Model() {
     delete s_arr;
     delete d_arr;
     delete fermions_pos;
+    delete old_fermions_pos;
 }
 
 int Model::random(int max) {
@@ -217,7 +220,7 @@ void Model::perform_step() {
         // tmp for counting result
         double tmp1, tmp2;
 
-        int d_ij;
+        double d_ij;
         double normalization = 0;
 
         // count available moves
@@ -238,11 +241,13 @@ void Model::perform_step() {
                     tmp1 = exp(beta * j_s * delta_s_ij);
                     tmp2 = exp(beta * j_d * delta_d_ij);
                     // workaround -- cant count with inf
-                    if(tmp2 > 1000000)
-                        tmp2 = 1000000.0;
-                    if(tmp1 > 1000000)
-                        tmp1 = 1000000.0;
-                    d_ij = 1; // FIXME: this should be counted
+                    if(tmp2 > 1000000) tmp2 = 1000000.0;
+                    if(tmp1 > 1000000) tmp1 = 1000000.0;
+
+                    // support fermion to continue moving in same direction
+                    // make returning to previous location less likely
+                    d_ij = compute_direction(i, position, x, y);
+
                     double val = preference_matrix[x + 1][y + 1] * tmp1 * tmp2 * d_ij;
                     tmp_matrix[x+1][y+1] = val;
                     normalization += val;
@@ -286,14 +291,20 @@ void Model::perform_step() {
                 continue;
             }
             insert(position.first, position.second, ferm->second);
+            update_fermion_old_position(ferm->first, ferm->second);
             ferm->second = make_pair(position.first, position.second);
         }
         else{
             double random = Random() * move_matrix[position.first][position.second];
             auto ferm = fermions_pos->find(i);
+            if(ferm == fermions_pos->end()){
+                cout << "Error 2" << endl;
+                continue;
+            }
 
             // fermion won battle for position
             if(random < 1.0){
+                update_fermion_old_position(ferm->first, ferm->second);
                 ferm->second = make_pair(position.first, position.second);
                 insert(position.first, position.second, ferm->second);
 
@@ -305,7 +316,7 @@ void Model::perform_step() {
                     if(ferm_dupl->second.first == position.first && ferm_dupl->second.second == position.second){
                         ferm_dupl = fermions_pos->find(j);
                         if(ferm_dupl == data.end()){
-                            cout << "Error 3" << endl;
+                            cout << "Error 2" << endl;
                             continue;
                         }
                         ++move_matrix[ferm_dupl->second.first][ferm_dupl->second.second];
@@ -325,6 +336,31 @@ void Model::perform_step() {
     for(int i = 0; i < edge; ++i)
         for(int j = 0; j < edge; ++j)
             matrix[i][j] = move_matrix[i][j];
+}
+
+double Model::compute_direction(int id, pair<int, int> position, int x, int y) {
+    auto old_pos = old_fermions_pos->find(id);
+    if(old_pos != old_fermions_pos->end()){
+        // going back case
+        if(position.first + x == old_pos->second.first && position.second + y == old_pos->second.second)
+            return exp(-beta * j_d);
+        // continue with current direction case
+        int new_x = position.first - (old_pos->second.first - position.first);
+        int new_y = position.second - (old_pos->second.second - position.second);
+        if(new_x == position.first + x && new_y == position.second + y)
+            return exp(beta * j_o);
+    }
+    // any other position
+    return 1.0;
+}
+
+void Model::update_fermion_old_position(int id, pair<int, int> fermion_pos){
+    auto ferm = old_fermions_pos->find(id);
+    if(ferm == old_fermions_pos->end()){
+        old_fermions_pos->insert(make_pair(id, fermion_pos));
+    }
+    else
+        ferm->second = fermion_pos;
 }
 
 void Model::get_limits(int position, int &start, int &end) {
@@ -355,7 +391,7 @@ void Model::remove_old_d_bossons() {
     }
 }
 
-void Model::run() {
+int Model::run() {
 //    print_s_arr();
     print_matrix();
     while(finished_fermions != fermions){
@@ -364,6 +400,7 @@ void Model::run() {
 //        print_matrix();
 //        print_d_arr();
     }
-    cout << "Total count of iterations is: " << iteration << endl;
+    return iteration;
+
 }
 

@@ -18,22 +18,37 @@ using std::vector;
 
 class Model {
 public:
-    Model(int, int, double, double, double, double);
+    /**
+     * Constructor
+     * @param matrix_size: size of matrix edge
+     * @param fermions: total count of fermions generated on map
+     * @param alpha: alpha value
+     * @param beta: beta value
+     * @param j_s: J-s value
+     * @param j_d: J-d value
+     */
+    Model(int, int, double, double, double, double, double);
     ~Model();
 
     /**
      * Prints matrix to stdout
+     * debug func
      */
     void print_matrix();
     /**
      * Prints s_arr to stdout
+     * debug func
      */
     void print_s_arr();
+    /**
+     * Prints d_arr to stdout
+     * debug func
+     */
     void print_d_arr();
     /**
      * Starts simulations
      */
-    void run();
+    int run();
 
 private:
     /** Input arguments */
@@ -41,6 +56,7 @@ private:
     double beta;
     double j_s;
     double j_d;
+    double j_o;
     int fermions;
     int edge;
     int matrix_size; //! edge * edge
@@ -59,6 +75,9 @@ private:
 
     //! fermion ID -> coordinates
     map< int, pair<int, int> > *fermions_pos;
+    //! fermion ID -> coordinates
+    //! contains fermions last position
+    map< int, pair<int, int> > *old_fermions_pos;
 
     /**
      * Generates random number from zero to range
@@ -87,11 +106,34 @@ private:
      */
     void insert(int, int, pair< int, int >);
 
+    /**
+     * Perform one iteration with all needed steps except removing old D-bossons
+     * * count probability for all 9 coordinates where fermion can access
+     * * select randomly one of them
+     * * resolve conflicts - two or more fermions want to go on same position
+     * * update fermion values and maps
+     */
     void perform_step();
 
+    /**
+     * Gets limits for current 3x3 matrix
+     * Positions where current fermion can access
+     * @param position: coordinate -> whether is counted for X or Y coordinate
+     * @param start: reference to start variable where is result stored
+     * @param end: reference to end variable where is result stored
+     */
     void get_limits(int, int &, int &);
 
+    /**
+     * Remove d bosons oder than iteration - 2 cycles with alpha probability
+     */
     void remove_old_d_bossons();
+
+
+    void update_fermion_old_position(int, pair<int, int>);
+
+
+    double compute_direction(int, pair<int, int>, int, int);
 };
 
 #endif //IMS_MODEL_H

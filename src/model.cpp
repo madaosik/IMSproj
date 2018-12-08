@@ -393,7 +393,7 @@ void Model::remove_old_d_bossons() {
 
 int Model::run() {
 //    print_s_arr();
-    print_matrix();
+    //print_matrix();
     while(finished_fermions != fermions){
         perform_step();
         remove_old_d_bossons();

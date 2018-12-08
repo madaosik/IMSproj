@@ -82,7 +82,8 @@ void Model::print_matrix() {
         cout << "--";
     cout << "-" << endl;
     for(int i = 0; i < edge; ++i){
-        if(i == exit_pos) // || i == exit_pos + 1 || i == exit_pos - 1)
+        if(i == exit_pos)
+//         if(i == exit_pos || i == exit_pos + 1 || i == exit_pos - 1)
             cout << " ";
         else
             cout << "|";
@@ -191,7 +192,7 @@ void Model::perform_step() {
         // if fermion is on end position, remove it
         if(position.second == 0){
             if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1){
-//               || position.first == exit_pos + 2 || position.first == exit_pos - 2){
+//              if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1 || position.first == exit_pos + 2 || position.first == exit_pos - 2){
                 ++finished_fermions;
                 fermions_pos->erase(i);
                 continue;
@@ -236,6 +237,11 @@ void Model::perform_step() {
                         delta_d_ij = 0;
                     tmp1 = exp(beta * j_s * delta_s_ij);
                     tmp2 = exp(beta * j_d * delta_d_ij);
+                    // workaround -- cant count with inf
+                    if(tmp2 > 1000000)
+                        tmp2 = 1000000.0;
+                    if(tmp1 > 1000000)
+                        tmp1 = 1000000.0;
                     d_ij = 1; // FIXME: this should be counted
                     double val = preference_matrix[x + 1][y + 1] * tmp1 * tmp2 * d_ij;
                     tmp_matrix[x+1][y+1] = val;

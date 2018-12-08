@@ -19,7 +19,7 @@ using std::endl;
 
 int main(int argc, char **argv){
     int c, matrix_size = 0,  fermions = 0;
-    double alpha = 0.5, beta = 10, j_s = 2, j_d = 10;
+    double alpha = 0.5, beta = 10, j_s = 2, j_d = 1;
 
     while ((c = getopt(argc, argv, "a:b:m:f:s:d:")) != -1)
         switch (c) {

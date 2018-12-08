@@ -23,22 +23,22 @@ int main(int argc, char **argv){
 
     while ((c = getopt(argc, argv, "a:b:m:f:s:d:")) != -1)
         switch (c) {
-            case 'a':
+            case 'a': // alpha
                 alpha = atof(optarg);
                 break;
-            case 'b':
+            case 'b': // beta
                 beta = atof(optarg);
                 break;
-            case 'm':
+            case 'm': // matrix edge size
                 matrix_size = atoi(optarg);
                 break;
-            case 'f':
+            case 'f': // count of fermions
                 fermions = atoi(optarg);
                 break;
-            case 's':
+            case 's': // J-s
                 j_s = atof(optarg);
                 break;
-            case 'd':
+            case 'd': // J-d
                 j_d = atof(optarg);
                 break;
             case '?':

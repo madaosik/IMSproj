@@ -29,6 +29,7 @@ public:
      * Prints s_arr to stdout
      */
     void print_s_arr();
+    void print_d_arr();
     /**
      * Starts simulations
      */
@@ -84,7 +85,7 @@ private:
      * @param row: index in matrix
      * @param col: index in matrix
      */
-    void insert(int, int);
+    void insert(int, int, pair< int, int >);
 
     void perform_step();
 

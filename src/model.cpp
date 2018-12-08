@@ -120,6 +120,19 @@ void Model::print_s_arr(){
     cout << "---" << endl << endl;
 }
 
+void Model::print_d_arr() {
+    for(int i = 0; i < matrix_size; ++i){
+        if (i % edge == 0)
+            cout << endl;
+        auto val = d_arr->find(i);
+        if (val != d_arr->end())
+            cout << val->second->size() << " ";
+        else
+            cout << ". ";
+    }
+    cout << endl;
+}
+
 void Model::generate_s_arr() {
     double step = 1.0 / (2.0 * edge), result;
 
@@ -135,7 +148,10 @@ void Model::generate_s_arr() {
     }
 }
 
-void Model::insert(int row, int col) {
+void Model::insert(int row, int col, pair< int, int > ferm) {
+    if(row == ferm.first && col == ferm.second)
+        return;
+
     int index = row * edge + col;
 
     if((d_arr->find(index)) == d_arr->end()) {
@@ -146,16 +162,6 @@ void Model::insert(int row, int col) {
     else{
         d_arr->operator[](index)->push_back(iteration);
     }
-}
-
-void Model::run() {
-    print_matrix();
-    while(finished_fermions != fermions){
-        perform_step();
-        remove_old_d_bossons();
-        print_matrix();
-    }
-    cout << "Total count of iterations is: " << iteration << endl;
 }
 
 void Model::perform_step() {
@@ -272,8 +278,8 @@ void Model::perform_step() {
                 cout << "Error 2" << endl;
                 continue;
             }
+            insert(position.first, position.second, ferm->second);
             ferm->second = make_pair(position.first, position.second);
-            insert(position.first, position.second);
         }
         else{
             double random = Random() * move_matrix[position.first][position.second];
@@ -282,7 +288,7 @@ void Model::perform_step() {
             // fermion won battle for position
             if(random < 1.0){
                 ferm->second = make_pair(position.first, position.second);
-                insert(position.first, position.second);
+                insert(position.first, position.second, ferm->second);
 
                 for(int j = i + 1; j < fermions; ++j){
                     auto ferm_dupl = data.find(j);
@@ -304,11 +310,10 @@ void Model::perform_step() {
             else{
                 ++move_matrix[ferm->second.first][ferm->second.second];
                 --move_matrix[position.first][position.second];
-                insert(position.first, position.second);
+                insert(position.first, position.second, ferm->second);
             }
         }
     }
-    cout << endl;
 
     for(int i = 0; i < edge; ++i)
         for(int j = 0; j < edge; ++j)
@@ -342,3 +347,16 @@ void Model::remove_old_d_bossons() {
         }
     }
 }
+
+void Model::run() {
+//    print_s_arr();
+    print_matrix();
+    while(finished_fermions != fermions){
+        perform_step();
+        remove_old_d_bossons();
+//        print_matrix();
+//        print_d_arr();
+    }
+    cout << "Total count of iterations is: " << iteration << endl;
+}
+

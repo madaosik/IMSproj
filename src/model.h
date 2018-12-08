@@ -129,10 +129,23 @@ private:
      */
     void remove_old_d_bossons();
 
-
+    /**
+     * Save old coordinates to old_fermions_pos before performing move
+     * @param id: fermion ID
+     * @param fermion_pos: fermion current position
+     */
     void update_fermion_old_position(int, pair<int, int>);
 
-
+    /**
+     * Compute probability of direction for index
+     * @param id: fermion ID
+     * @param position: fermions current position
+     * @param x: currently counted move row index
+     * @param y: currently counter move col index
+     * @return exp(-beta * j_d) if computed coordinates are same as fermion moved from
+     *         exp(beta * j_o) if coordinates continue in same direction as last move
+     *         1.0 else
+     */
     double compute_direction(int, pair<int, int>, int, int);
 };
 

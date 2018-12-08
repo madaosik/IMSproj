@@ -58,7 +58,7 @@ int main(int argc, char **argv){
 
     auto m = new Model(matrix_size, fermions, alpha, beta, j_s, j_d, j_o);
     int res = m->run();
-    cout << "This configurations takes exactly " <<  res << " iterations to finish" << endl;
+    cout << "Pocet iteraci potrebnych k opusteni mistnosti vsemi fermiony:" <<  res << endl;
 
     return 0;
 }

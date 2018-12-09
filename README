@@ -1,0 +1,45 @@
+Spuštění jedné ukázkové simulace:
+
+    make run
+
+Spuštění sady 5 ukázkových simulací:
+
+    make test
+
+Příprava a spuštění jednoho běhu simulace
+
+    make
+    ./IMS_CA -f 500 -m 50
+
+    IMS_CA – spouštěcí parametry: 
+
+    •	-f <počet fermionů>
+        o	povinný parametr, počet přítomných fermionů v místnosti
+    •	-m <rozměr>
+        o	povinný parametr, délka jedné strany čtvercové místnosti
+    •	-a <hodnota parametru alfa>
+        o	volitelný parametr vyjadřující pravděpodobnost zmizení nejstaršího d-bosonu ze všech buněk po ukončení iterace. Implicitně nastaven na 0,5.
+    •	-b <hodnota parametru beta>
+        o	volitelný parametr. Implicitně 10.
+    •	-s <hodnota parametru Js>
+        o	volitelný parametr vyjadřující sílu vazby fermionů na hodnoty statické složky pozemního pole. Implicitně 2.
+    •	-d <hodnota parametru Jd>
+        o	volitelný parametr vyjadřující sílu vazby fermionů na hodnoty dynamické složky pozemního pole. Implicitně 1.
+
+
+Vzhledem k omezené vypovídací schopnosti jednoho běhu simulace s danými parametry jsme se rozhodli pro implementaci dodatečného bash skriptu (soubor sim.sh v kořenovém adresáři), který simulaci provede opakovaně a na standardní výstup postupně vypisuje její výsledky a nakonec i vypočte aritmetický průměr hodnot iterací všech provedených simulací.
+Nad rámec parametrů uvedených výše, které jsou ve stejné podobě aplikovatelné i na něj, mezi jeho spouštěcí parametry dále patří:
+
+sim.sh – spouštěcí parametry:
+
+    •	-n <počet simulací>
+        o	počet simulací, které chceme provést. Pokud parametr není uveden, implicitně je simulací provedeno 5.
+    •	-sens_sim <parametr> <počet kroků> <inkrementační faktor>
+        o	spuštění sady simulací v módu analýzy citlivosti na změnu daného <parametr>. Je provedeno <počet kroků> inkrementací/dekrementací hodnoty <parametr> pomocí <inkrementační faktor>
+
+    Příklady spuštění:
+        ./sim.sh -f 500 -m 50 -n 10
+            •	spouštím 10 simulací se zadanými parametry
+
+        ./sim.sh -f 500 -m 50 -n 20 -sens_sim a 5 1.15
+            •	spouštím analýzu citlivosti na změnu parametru alfa. Provede se vždy 20 simulací s danou hodnotou (v tomto případě začínáme na implicitní hodnotě 0.5) a poté je hodnota parametru vynásobena hodnotou 1.15. Tento celý cyklus se opakuje 5x.

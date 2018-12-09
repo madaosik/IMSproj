@@ -4,3 +4,5 @@ cmake-build-debug
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
+doc/simulace.xlsx
+doc/IMSproj_doc.docx

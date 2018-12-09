@@ -14,5 +14,11 @@ default:
 run:default
 	./${PROJ} ${RUN_PARAMS}
 
+test: default
+	./sim.sh -n 5 -f 500 -m 50
+
+clean:
+	rm IMS_CA
+
 pack:
 	tar -cvf ${AUTHORS}.tar.gz doc/ Makefile README.md src/ CMakeLists.txt

@@ -85,8 +85,8 @@ void Model::print_matrix() {
         cout << "--";
     cout << "-" << endl;
     for(int i = 0; i < edge; ++i){
-        if(i == exit_pos)
-//         if(i == exit_pos || i == exit_pos + 1 || i == exit_pos - 1)
+//        if(i == exit_pos)
+         if(i == exit_pos || i == exit_pos + 1 || i == exit_pos - 1)
             cout << " ";
         else
             cout << "|";
@@ -194,8 +194,8 @@ void Model::perform_step() {
 
         // if fermion is on end position, remove it
         if(position.second == 0){
-            if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1){
-//              if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1 || position.first == exit_pos + 2 || position.first == exit_pos - 2){
+//            if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1){
+              if(position.first == exit_pos || position.first == exit_pos + 1 || position.first == exit_pos - 1 || position.first == exit_pos + 2 || position.first == exit_pos - 2){
                 ++finished_fermions;
                 fermions_pos->erase(i);
                 continue;
@@ -392,14 +392,16 @@ void Model::remove_old_d_bossons() {
 }
 
 int Model::run() {
-//    print_s_arr();
+    //print_s_arr();
     //print_matrix();
     while(finished_fermions != fermions){
         perform_step();
         remove_old_d_bossons();
-//        print_matrix();
+        //if (iteration == 300) 
+	//	print_matrix();
 //        print_d_arr();
     }
+    //print_matrix();
     return iteration;
 
 }
